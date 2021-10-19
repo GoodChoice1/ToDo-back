@@ -4,7 +4,26 @@ const cors = require('cors');
 const { rawListeners } = require('process');
 const e = require('express');
 const { consumers } = require('stream');
+const { Sequelize } = require("sequelize");
+const sequelize = new Sequelize("myWebDb", "root", "12345", {
+  dialect: "postgres",
+  host: "localhost"
+});
+const queryInterface = sequelize.getQueryInterface();
+const ToDo = sequelize.define("todo", {
+  title: {
+    type: Sequelize.STRING,
+    primaryKey: true,
+    allowNull: false
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: true
+  }
+});
 let array = []
+
+
 
 if (typeof localStorage === "undefined" || localStorage === null) {
   var LocalStorage = require('node-localstorage').LocalStorage;
@@ -74,7 +93,7 @@ app.get('/reverseArray', (req, res) => {
   res.status(200).json({ message: a });
 })
 
-app.get('/strings', (req, res) => {
+app.get('/strings', (res) => {
   res.status(200).json({ message: array });
 })
 
@@ -86,16 +105,103 @@ app.post('/strings', (req, res) => {
 })
 
 app.delete('/strings/:index', (req, res) => {
-  var id = parseInt(req.params.index) - 1
+  let id = parseInt(req.params.index) - 1
   array.splice(id, 1)
   localStorage.setItem('arr', array);
   res.status(200).json({ message: array });
 })
 
-app.delete('/strings', (req, res) => {
+app.delete('/strings', (res) => {
   array = []
   localStorage.setItem('arr', undefined);
   res.status(200).json({ message: "Array deleted" });
+})
+
+app.post('/db', (req, res) => {
+let title = req.body.title;
+let description = req.body.description;
+let todo = ToDo.build({
+  title: title,
+  description: description
+});
+todo.save();
+res.status(200).json({message: "Created todo", title: title, description: description})
+})
+
+app.get('/db',async (req, res) => {
+  let title = req.body.title;
+  let todo = await ToDo.findAll({
+    raw: true,
+    where : {
+      title: title
+    }
+  })
+  todo = todo[0];
+  if (todo != undefined){
+    res.status(200).json({message: "Your todo", title: todo.title, description: todo.description})
+  }
+  else {
+    res.status(404).json({message: "Todo not found"})
+  }
+  
+})
+
+app.put('/db',async (req, res) => {
+  let title = req.body.title;
+  let description = req.body.description;
+  let todo = await ToDo.findAll({
+    raw: true,
+    where : {
+      title: title
+    }
+  })
+  if (todo[0] != undefined){
+     await ToDo.update(
+      {description : description}, 
+      { where : {
+        title: title
+      }
+    })
+    res.status(200).json({message: "Changed todo", title: title, description: todo.description })
+  }
+  else {
+    res.status(404).json({message: "Todo not found"})
+  }
+})
+
+app.delete('/db',async (req, res) => {
+  let title = req.body.title;
+  let todo =await ToDo.findAll({
+    where : {
+      title: title
+    }
+  })
+  todo = todo[0];
+  if (todo != undefined){
+    ToDo.destroy({
+      where : {
+        title: title
+      }
+    });
+    res.status(200).json({message: "Deleted todo", title: title})
+  }
+  else {
+    res.status(404).json({message: "Todo not found"})
+  }
+})
+
+app.delete('/db/all',async (req, res) => {
+  let title = req.body.title;
+  let todo =await ToDo.findAll({
+  })
+  if (todo[0] != undefined){
+    ToDo.destroy({
+      truncate: true,
+  })
+  res.status(200).json({message: "Deleted all todos"})
+  }
+  else
+  res.status(200).json({message: "Table is empty"})
 })
 
 http.createServer(app).listen(3000, () => {
