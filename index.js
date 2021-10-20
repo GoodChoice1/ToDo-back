@@ -9,7 +9,6 @@ const sequelize = new Sequelize("myWebDb", "root", "12345", {
   dialect: "postgres",
   host: "localhost"
 });
-const queryInterface = sequelize.getQueryInterface();
 const ToDo = sequelize.define("todo", {
   title: {
     type: Sequelize.STRING,
@@ -21,6 +20,7 @@ const ToDo = sequelize.define("todo", {
     allowNull: true
   }
 });
+sequelize.sync();
 let array = []
 
 
