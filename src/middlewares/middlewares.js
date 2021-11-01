@@ -1,4 +1,5 @@
 const ErrorResponse = require("../classes/error-response");
+const Token = require("../dataBase/models/Token.model");
 
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -26,15 +27,20 @@ const errorHandler = (err, _req, res, _next) => {
   });
 };
 
-const requireToken = async (req, res, next) => {
-  // тут проверка токена на валидность через еррор респонс с 403 ошибкой
+const requireToken = async (req, _res, next) => {
+  let token = await Token.findOne({
+    where: {
+      value: req.body.token,
+    },
+  });
+  if (!token) throw new ErrorResponse("Invalid token", 403);
   next();
-}
+};
 
 module.exports = {
   asyncHandler,
   syncHandler,
   notFound,
   errorHandler,
-  requireToken
+  requireToken,
 };

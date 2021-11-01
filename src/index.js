@@ -4,12 +4,9 @@ const cors = require("cors");
 const app = express();
 const db = require("./dataBase");
 const apiTodoRouter = require("./controllers/api-todos.controller");
-const apiAuthRouter = require('./controllers/api-auth.controller')
-const {
-  notFound,
-  errorHandler,
-  asyncHandler,
-} = require("./middlewares/middlewares");
+const apiAuthRouter = require("./controllers/api-auth.controller");
+const apiUserRouter = require("./controllers/api-users.controller");
+const { notFound, errorHandler } = require("./middlewares/middlewares");
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -30,6 +27,7 @@ app.use((req, res, next) => {
 
 app.use("/api/todos", apiTodoRouter);
 app.use("/api/auth", apiAuthRouter);
+app.use("/api/user", apiUserRouter);
 
 app.use(notFound);
 app.use(errorHandler);

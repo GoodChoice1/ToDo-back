@@ -22,7 +22,7 @@ async function registration(req, res, next) {
       },
     },
   });
-  if (user) throw new ErrorResponse("User name and email must be unique", 400);
+  if (user) throw new ErrorResponse("Username and email must be unique", 400);
   user = await User.create(req.body);
   res.status(200).json(user);
 }
