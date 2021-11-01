@@ -1,11 +1,7 @@
 const ToDo = require("../dataBase/models/ToDo.model");
 const { Router } = require("express");
-const {
-  asyncHandler,
-  requireToken,
-  notFound,
-} = require("../middlewares/middlewares");
-const Token = require("../dataBase/models/Token.model");
+const { asyncHandler, requireToken } = require("../middlewares/middlewares");
+const ErrorResponse = require("../classes/error-response");
 
 const router = Router();
 
@@ -19,49 +15,31 @@ function initRoutes() {
 }
 
 async function createTodo(req, res, _next) {
-  let token = await Token.findOne({
-    where: {
-      value: req.body.token,
-    },
-  });
-  let todo = await ToDo.create({
-    title: req.body.title,
-    description: req.body.description,
-    userId: token.userId,
-    isDone: req.body.isDone,
-    isFavourite: req.body.isFavourite,
-    priority: req.body.priority,
-  });
+  let todo = await ToDo.create(...req.headers, req.userId);
   res.status(200).json(todo);
 }
 
 async function getAllTodos(req, res, _next) {
-  let token = await Token.findOne({
-    where: {
-      value: req.body.token,
-    },
-  });
-
   let todoList = await ToDo.findAll({
     where: {
-      userId: token.userId,
+      userId: req.userId,
     },
   });
   res.status(200).json({ todoList });
 }
 
-async function getTodoById(req, res, next) {
+async function getTodoById(req, res, _next) {
   let todo = await ToDo.findByPk(req.params.id);
 
-  if (!todo) throw notFound(req, res, next);
+  if (!todo) throw new ErrorResponse("Todo not found", 404);
   res.status(200).json(todo);
 }
 
 async function patchTodoById(req, res, next) {
   let id = req.params.id;
   let todo = await ToDo.findByPk(id);
-  if (!todo) throw notFound(req, res, next);
-  todo = await ToDo.update(req.body, {
+  if (!todo) throw new ErrorResponse("Todo not found", 404);
+  todo = await ToDo.update(req.headers, {
     where: {
       id: req.params.id,
     },
@@ -71,18 +49,10 @@ async function patchTodoById(req, res, next) {
 }
 
 async function deleteAllTodos(req, res, _next) {
-  let token = await Token.findOne({
+  ToDo.destroy({
     where: {
-      value: req.body.token,
+      userId: req.userId,
     },
-  });
-  let todoList = await ToDo.findAll({
-    where: {
-      userId: token.userId,
-    },
-  });
-  todoList.forEach(async(todo) => {
-    await todo.destroy();
   });
   res.status(200).json({ message: "Deleted all todos" });
 }
@@ -90,7 +60,7 @@ async function deleteAllTodos(req, res, _next) {
 async function deleteTodoById(req, res, next) {
   let id = req.params.id;
   let todo = await ToDo.findByPk(id);
-  if (!todo) throw notFound(req, res, next);
+  if (!todo) throw new ErrorResponse("Todo not found", 404);
   await todo.destroy();
   res.status(200).json({ message: "Deleted todo" });
 }

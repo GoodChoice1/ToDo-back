@@ -17,21 +17,21 @@ async function registration(req, res, next) {
   let user = await User.findOne({
     where: {
       [Op.or]: {
-        email: req.body.email,
-        login: req.body.login,
+        email: req.headers.email,
+        login: req.headers.login,
       },
     },
   });
   if (user) throw new ErrorResponse("Username and email must be unique", 400);
-  user = await User.create(req.body);
+  user = await User.create(req.headers);
   res.status(200).json(user);
 }
 
 async function login(req, res, next) {
   let user = await User.findOne({
     where: {
-      login: req.body.login,
-      password: req.body.password,
+      login: req.headers.login,
+      password: req.headers.password,
     },
   });
   if (!user) throw new ErrorResponse("Wrong login or password", 400);

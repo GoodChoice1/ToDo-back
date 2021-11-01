@@ -14,7 +14,7 @@ app.use(express.json());
 
 db.initDB();
 
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log("URL = ", req.url);
   console.log("Original_URL = ", req.originalUrl);
   console.log("METHOD = ", req.method);
