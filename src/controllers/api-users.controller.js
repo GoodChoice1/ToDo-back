@@ -54,13 +54,11 @@ async function updateUserPassword(req, res, _next) {
 }
 
 async function logoutUser(req, res, _next) {
-  let token = await Token.findOne({
+  Token.destroy({
     where: {
       value: req.headers.token,
     },
   });
-
-  await token.destroy();
   
   res.status(200).json({ message: "Logged out" });
 }

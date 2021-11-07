@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const app = express();
-const db = require("./dataBase");
+const { initDB } = require("./dataBase");
 const apiTodoRouter = require("./controllers/api-todos.controller");
 const apiAuthRouter = require("./controllers/api-auth.controller");
 const apiUserRouter = require("./controllers/api-users.controller");
@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-db.initDB();
+initDB();
 
 app.use((req, _res, next) => {
   console.log("URL = ", req.url);
