@@ -58,7 +58,7 @@ async function resetPassword(req, res, _next) {
     },
   });
 
-  if (!user) throw new ErrorResponse("User with this email not found", 404);
+  if (!user) throw new ErrorResponse("User not found", 404);
 
   let token = await Token.create({
     userId: user.id,
@@ -70,12 +70,7 @@ async function resetPassword(req, res, _next) {
     .map((value) => value.charCodeAt(0) ** 2 + 13)
     .join("_");
 
-  let password = req.headers.password
-    .split("")
-    .map((value) => value.charCodeAt(0) ** 2 + 13)
-    .join("_");
-
-  let link = "http://localhost:3000/api/user/resetPassword/" + value + "/" + password;
+  let link = "http://localhost:3000/api/user/resetPassword/" + value;
 
   await transporter.sendMail({
     from: '"Todo list" <Lol43gg@gmail.com>',

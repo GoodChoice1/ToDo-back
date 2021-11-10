@@ -9,7 +9,7 @@ const router = Router();
 
 function initRoutes() {
   router.get("/me", asyncHandler(requireToken), asyncHandler(receiveUserInfo));
-  router.get("/resetPassword/:value/:pass", asyncHandler(resetPassword));
+  router.patch("/resetPassword", asyncHandler(requireToken), asyncHandler(resetPassword));
   router.patch("/me", asyncHandler(requireToken), asyncHandler(updateUserInfo));
   router.patch("/me/password", asyncHandler(requireToken), asyncHandler(updateUserPassword));
   router.post("/logout", asyncHandler(requireToken), asyncHandler(logoutUser));
@@ -75,28 +75,19 @@ async function logoutUser(req, res, _next) {
 }
 
 async function resetPassword(req, res, _next) {
-  let realValue = req.params.value
-    .split("_")
-    .map((value) => String.fromCharCode(Math.sqrt(value - 13)))
-    .join("");
-
   let token = await Token.findOne({
     where: {
-      value: realValue,
+      value: req.headers.value,
     },
   });
-  if (!token) throw new ErrorResponse("Wrong token", 403);
 
-  let realPassword = req.params.pass
-    .split("_")
-    .map((value) => String.fromCharCode(Math.sqrt(value - 13)))
-    .join("");
+  if (!token) throw new ErrorResponse("Wrong token", 403);
 
   let user = await User.update(
     { password: realPassword },
     {
       where: {
-        id: token.userId,
+        id: req.headers.pass,
       },
       returning: true,
     }
