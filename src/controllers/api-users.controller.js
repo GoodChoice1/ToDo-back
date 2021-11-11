@@ -9,7 +9,7 @@ const router = Router();
 
 function initRoutes() {
   router.get("/me", asyncHandler(requireToken), asyncHandler(receiveUserInfo));
-  router.patch("/resetPassword", asyncHandler(requireToken), asyncHandler(resetPassword));
+  router.patch("/reset-password", asyncHandler(requireToken), asyncHandler(resetPassword));//into auth 
   router.patch("/me", asyncHandler(requireToken), asyncHandler(updateUserInfo));
   router.patch("/me/password", asyncHandler(requireToken), asyncHandler(updateUserPassword));
   router.post("/logout", asyncHandler(requireToken), asyncHandler(logoutUser));
@@ -84,7 +84,7 @@ async function resetPassword(req, res, _next) {
   if (!token) throw new ErrorResponse("Wrong token", 403);
 
   let user = await User.update(
-    { password: realPassword },
+    { password: req.headers.password },
     {
       where: {
         id: req.headers.pass,

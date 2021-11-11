@@ -12,7 +12,7 @@ const router = Router();
 function initRoutes() {
   router.post("/register", asyncHandler(registration));
   router.post("/login", asyncHandler(login));
-  router.post("/resetPassword", asyncHandler(resetPassword));
+  router.post("/reset-password", asyncHandler(resetPassword));
 }
 
 async function registration(req, res, next) {
@@ -69,11 +69,11 @@ async function resetPassword(req, res, _next) {
     .split("")
     .map((value) => value.charCodeAt(0) ** 2 + 13)
     .join("_");
-
-  let link = "http://localhost:3000/api/user/resetPassword/" + value;
+// добавить модель 
+  let link = "http://localhost:3000/api/user/resetPassword?xyz=" + value;
 
   await transporter.sendMail({
-    from: '"Todo list" <Lol43gg@gmail.com>',
+    from: '"Todo list" <mail>',
     to: req.headers.email,
     subject: "Password resetting",
     text: "Follow the link to reset your email " + link,
