@@ -34,6 +34,7 @@ ToDo.init(
       type: Sequelize.SMALLINT,
       defaultValue: 1,
     },
+    timestamps: false,
   },
   { sequelize: sequelize, underscored: true, modelName: "todo" }
 );

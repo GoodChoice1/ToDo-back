@@ -30,6 +30,7 @@ User.init(
       allowNull: true,
       defaultValue: "",
     },
+    timestamps: false,
   },
   { sequelize: sequelize, underscored: true, modelName: "user" }
 );
