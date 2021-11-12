@@ -15,9 +15,8 @@ Token.init(
       type: Sequelize.STRING,
       allowNull: false,
     },
-    timestamps: false,
   },
-  { sequelize: sequelize, underscored: true, modelName: "token" }
+  { sequelize: sequelize, underscored: true, modelName: "token", timestamps: false }
 );
 
 module.exports = Token;
