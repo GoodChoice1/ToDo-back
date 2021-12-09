@@ -11,7 +11,7 @@ function initRoutes() {
   router.get("/me", asyncHandler(requireToken), asyncHandler(receiveUserInfo));
   // router.patch("/reset-password", asyncHandler(requireToken), asyncHandler(resetPassword));//into auth 
   router.patch("/me", asyncHandler(requireToken), asyncHandler(updateUserInfo));
-  router.patch("/me/password", asyncHandler(requireToken), asyncHandler(updateUserPassword));
+  router.patch("/password", asyncHandler(requireToken), asyncHandler(updateUserPassword));
   router.post("/logout", asyncHandler(requireToken), asyncHandler(logoutUser));
 }
 
@@ -36,11 +36,12 @@ async function updateUserInfo(req, res, _next) {
 
 async function updateUserPassword(req, res, _next) {
   let user = await User.findByPk(req.userId);
-  if (oldPassword != user.password)
+  console.log("GFGHFGHFH;OFKHGJFLKJHFLKHJFLHKJFGHFLKGHJFHKLFJHLFKH")
+  if (req.body.oldPassword != user.password)
     throw new ErrorResponse("Wrong password", 403);
 
   user = await User.update(
-    { password: password },
+    { password: req.body.newPassword },
     {
       where: {
         id: req.userId,
