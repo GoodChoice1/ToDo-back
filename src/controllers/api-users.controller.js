@@ -9,11 +9,10 @@ const router = Router();
 
 function initRoutes() {
   router.get("/me", asyncHandler(requireToken), asyncHandler(receiveUserInfo));
-  router.patch("/reset-password", asyncHandler(requireToken), asyncHandler(resetPassword));//into auth 
+  // router.patch("/reset-password", asyncHandler(requireToken), asyncHandler(resetPassword));//into auth 
   router.patch("/me", asyncHandler(requireToken), asyncHandler(updateUserInfo));
   router.patch("/me/password", asyncHandler(requireToken), asyncHandler(updateUserPassword));
   router.post("/logout", asyncHandler(requireToken), asyncHandler(logoutUser));
-  router.post("/destroyTokens", asyncHandler(requireToken), asyncHandler(deleteTokensExceptThis));
 }
 
 async function receiveUserInfo(req, res, _next) {
@@ -23,9 +22,9 @@ async function receiveUserInfo(req, res, _next) {
 
 async function updateUserInfo(req, res, _next) {
   let user = await User.findByPk(req.userId);
-  req.headers.password = user.password;
+  req.body.password = user.password;
 
-  user = await User.update(req.headers, {
+  user = await User.update(req.body, {
     where: {
       id: req.userId,
     },
@@ -63,53 +62,29 @@ async function logoutUser(req, res, _next) {
   res.status(200).json({ message: "Logged out" });
 }
 
-async function logoutUser(req, res, _next) {
-  let token = await Token.findOne({
-    where: {
-      value: req.headers.token,
-    },
-  });
-  await token.destroy();
+// async function resetPassword(req, res, _next) {
+//   let token = await Token.findOne({
+//     where: {
+//       value: req.body.value,
+//     },
+//   });
 
-  res.status(200).json({ message: "Logged out" });
-}
+//   if (!token) throw new ErrorResponse("Wrong token", 403);
 
-async function resetPassword(req, res, _next) {
-  let token = await Token.findOne({
-    where: {
-      value: req.headers.value,
-    },
-  });
+//   let user = await User.update(
+//     { password: req.body.password },
+//     {
+//       where: {
+//         id: req.body.pass,
+//       },
+//       returning: true,
+//     }
+//   );
 
-  if (!token) throw new ErrorResponse("Wrong token", 403);
+//   await token.destroy();
 
-  let user = await User.update(
-    { password: req.headers.password },
-    {
-      where: {
-        id: req.headers.pass,
-      },
-      returning: true,
-    }
-  );
-
-  await token.destroy();
-
-  res.status(200).json(user);
-}
-
-async function deleteTokensExceptThis(req, res, _next) {
-  await Token.destroy({
-    where: {
-      userId: req.userId,
-      [Op.not]: {
-        value: req.headers.token
-      }
-    },
-  });
-
-  res.status(200).json({ message: "Logged out all" });
-}
+//   res.status(200).json(user);
+// }
 
 initRoutes();
 

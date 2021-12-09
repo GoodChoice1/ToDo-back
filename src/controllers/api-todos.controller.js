@@ -10,8 +10,8 @@ const router = Router();
 function initRoutes() {
   router.get("/", asyncHandler(requireToken), asyncHandler(getAllTodos));
   router.get("/:id", asyncHandler(requireToken), asyncHandler(getTodoById));
-  router.get("/noLogin/:id/:value", asyncHandler(getTodoWithoutLogin));
-  router.get("/link/:id", asyncHandler(requireToken), asyncHandler(getLinkWithoutToken));
+  // router.get("/noLogin/:id/:value", asyncHandler(getTodoWithoutLogin));
+  // router.get("/link/:id", asyncHandler(requireToken), asyncHandler(getLinkWithoutToken));
   router.post("/", asyncHandler(requireToken), asyncHandler(createTodo));
   router.patch("/:id", asyncHandler(requireToken), asyncHandler(patchTodoById));
   router.delete("/", asyncHandler(requireToken), asyncHandler(deleteAllTodos));
@@ -20,11 +20,11 @@ function initRoutes() {
 
 async function createTodo(req, res, _next) {
   let todo = await ToDo.create({
-    title: req.headers.title,
-    isDone: req.headers.isDone,
-    isFavourite: req.headers.isFavourite,
-    priority: req.headers.priority,
-    description: req.headers.description,
+    title: req.body.title,
+    isDone: req.body.isDone,
+    isFavourite: req.body.isFavourite,
+    priority: req.body.priority,
+    description: req.body.description,
     userId: req.userId,
   });
 
@@ -64,7 +64,7 @@ async function patchTodoById(req, res, _next) {
 
   if (!todo) throw new ErrorResponse("Todo not found", 404);
 
-  todo = await ToDo.update(req.headers, {
+  todo = await ToDo.update(req.body, {
     where: {
       userId: req.userId,
       id: req.params.id,
@@ -99,52 +99,52 @@ async function deleteTodoById(req, res, _next) {
   res.status(200).json({ message: "Deleted todo" });
 }
 
-async function getLinkWithoutToken(req, res, _next) {
-  let todo = await ToDo.findOne({
-    where: {
-      userId: req.userId,
-      id: req.params.id
-    },
-  });
+// async function getLinkWithoutToken(req, res, _next) {
+//   let todo = await ToDo.findOne({
+//     where: {
+//       userId: req.userId,
+//       id: req.params.id
+//     },
+//   });
 
-  if (!todo) throw new ErrorResponse("Todo not found", 404);
+//   if (!todo) throw new ErrorResponse("Todo not found", 404);
 
-  let token = await Token.create({
-    userId: todo.userid,
-    value: nanoid(128),
-  });
+//   let token = await Token.create({
+//     userId: todo.userid,
+//     value: nanoid(128),
+//   });
 
-  let value = token.value
-    .split("")
-    .map((value) => value.charCodeAt(0) ** 2 + 13)
-    .join("_");// также через отдельную модель
+//   let value = token.value
+//     .split("")
+//     .map((value) => value.charCodeAt(0) ** 2 + 13)
+//     .join("_");// также через отдельную модель
 
-  let link = "http://localhost:3000/api/todos/noLogin/" + todo.id + "/" + value;
+//   let link = "http://localhost:3000/api/todos/noLogin/" + todo.id + "/" + value;
 
-  res.status(200).json({ link: link });
-}
+//   res.status(200).json({ link: link });
+// }
 
-async function getTodoWithoutLogin(req, res, _next) {
-  let realValue = req.params.value
-    .split("_")
-    .map((value) => String.fromCharCode(Math.sqrt(value - 13)))
-    .join("");
+// async function getTodoWithoutLogin(req, res, _next) {
+//   let realValue = req.params.value
+//     .split("_")
+//     .map((value) => String.fromCharCode(Math.sqrt(value - 13)))
+//     .join("");
 
-  let token = await Token.findOne({
-    where: {
-      value: realValue,
-    },
-  });
+//   let token = await Token.findOne({
+//     where: {
+//       value: realValue,
+//     },
+//   });
 
-  if (!token) throw new ErrorResponse("Wrong token", 403);
-  await token.destroy();
+//   if (!token) throw new ErrorResponse("Wrong token", 403);
+//   await token.destroy();
 
-  let todo = await ToDo.findByPk(req.params.id);
+//   let todo = await ToDo.findByPk(req.params.id);
 
-  if (!todo) throw new ErrorResponse("Todo not found", 404);
+//   if (!todo) throw new ErrorResponse("Todo not found", 404);
   
-  res.status(200).json(todo);
-}
+//   res.status(200).json(todo);
+// }
 
 initRoutes();
 

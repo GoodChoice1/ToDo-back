@@ -30,7 +30,7 @@ const errorHandler = (err, _req, res, _next) => {
 const requireToken = async (req, _res, next) => {
   let value = req.headers.token;
   if (!value) throw new ErrorResponse("Invalid value", 403);
-  let token = await Token.findOne(value);
+  let token = await Token.findOne({where: { value: value }});
   if (!token) throw new ErrorResponse("Invalid token", 403);
   req.userId = token.userId;
   next();
